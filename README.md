@@ -27,7 +27,7 @@ A shell script for organizing data from memory cards into storage locations on m
 - Audio extensions (case-insensitive): `aa3`, `aac`, `adif`, `adts`, `aea`, `aif`, `aifc`, `aiff`, `at3`, `at9`, `atp`, `au`, `flac`, `hma`, `l16`, `m4a`, `m4b`, `m4r`, `m4r`, `mogg`, `mp3`, `mpc`, `msv`, `oga`, `ogg`, `oma`, `omg`, `opus`, `pcm`, `shn`, `snd`, `wav`, `wma`, `wv`
 - Files not identified as audio or video are assumed to be photos and moved to the corresponding folder
 - Safe with filenames containing spaces/newlines
-- You may test with --dry-run to view details of the operation without actually moving files
+- You may test with `--dry-run` to view details of the operation without actually moving files
 
 ## Example
 
