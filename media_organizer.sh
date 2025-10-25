@@ -114,14 +114,14 @@ eject_volume() {
 
 # Log to a file
 log() {
-  if [ "$LOGFILE" -ne "" ];  then
-    local ts msg
-    ts="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
-    msg="$1"
+  local ts msg
+  ts="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+  msg="$1"
+  if [[ -n "$LOGFILE" ]];  then
     printf '%s %s\n' "$ts" "$msg" >> "$LOGFILE"
-    if [ "$VERBOSE" -ne 0 ]; then
-      printf '%s %s\n' "$ts" "$msg"
-    fi
+  fi
+  if [ "$VERBOSE" -ne 0 ]; then
+    printf '\n%s %s\n' "$ts" "$msg"
   fi
 }
 
@@ -197,7 +197,11 @@ move_one_file() {
   fi
 
   if [ "$PRESERVE_TIMES" -ne 0 ]; then
-    rsync -a --no-perms --times -- "$src_file" "$dest_dir/" >> "$LOGFILE" 2>&1
+    if [[ -n "$LOGFILE" ]];  then
+      rsync -a --no-perms --times -- "$src_file" "$dest_dir/" >> "$LOGFILE" 2>&1
+    else
+      rsync -a --no-perms --times -- "$src_file" "$dest_dir/"
+    fi
     rc=$?
     if [ $rc -ne 0 ]; then
       log "ERROR: rsync failed ($rc) for '$src_file' -> '$dest_dir'"
@@ -206,11 +210,11 @@ move_one_file() {
     # Ensure the copied file is named correctly (rsync uses original basename)
     local copied_path="$dest_dir/$(basename -- "$src_file")"
     if [ "$copied_path" != "$dest_path" ]; then
-      mv -- "$copied_path" "$dest_path" >> "$LOGFILE" 2>&1 || { log "ERROR: failed to rename '$copied_path' -> '$dest_path'"; return 1; }
+      mv -- "$copied_path" "$dest_path" || { log "ERROR: failed to rename '$copied_path' -> '$dest_path'"; return 1; }
     fi
-    rm -f -- "$src_file" >> "$LOGFILE" 2>&1 || log "WARNING: failed to remove source '$src_file' after rsync"
+    rm -f -- "$src_file" || log "WARNING: failed to remove source '$src_file' after rsync"
   else
-    mv -- "$src_file" "$dest_path" >> "$LOGFILE" 2>&1 || { log "ERROR: mv failed for '$src_file' -> '$dest_path'"; return 1; }
+    mv -- "$src_file" "$dest_path" || { log "ERROR: mv failed for '$src_file' -> '$dest_path'"; return 1; }
   fi
 
   log "Moved: '$src_file' -> '$dest_path'"
