@@ -11,10 +11,10 @@ show_help() {
   echo "   -n, --dry-run               Show actions without performing them"
   echo "   -p, --preserve-times        Preserve modification times (uses rsync)"
   echo "   -j N, --jobs N              Run up to N move tasks in parallel (default: 1)"
-  echo "   -l FILE, --log FILE         Append operational log to FILE (default: <outputpath>/file_organizer.log)"
+  echo "   -l FILE, --log FILE         Enable logging and write the log to FILE"
   echo "   -v, --verbose               Verbose output"
   echo "   -r, --prune                 Remove empty directories under the input path after successful moves"
-  echo "   -k, --keep-volume           Keep the input volume, rather than ejecting it"
+  echo "   -k, --keep-volume           Keep the input volume mounted, rather than ejecting it"
   echo "   -F FOLDER, --dcim FOLDER    The subfolder in the input path in which to find media (default: \"/DCIM\")"
   echo "   -P FOLDER, --photo FOLDER   The base folder into which image files should be stored (default: \"Photo/Raw\")"
   echo "   -V FOLDER, --video FOLDER   The base folder into which video files should be stored (default: \"Video/Raw\")"
@@ -101,10 +101,6 @@ fi
 
 mkdir -p "$OUTPUTPATH"
 
-if [ -z "$LOGFILE" ]; then
-  LOGFILE="$OUTPUTPATH/file_organizer.log"
-fi
-
 # Eject the volume
 eject_volume() {
   if [ "$DRY_RUN" -ne 0 ]; then
@@ -118,12 +114,14 @@ eject_volume() {
 
 # Log to a file
 log() {
-  local ts msg
-  ts="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
-  msg="$1"
-  printf '%s %s\n' "$ts" "$msg" >> "$LOGFILE"
-  if [ "$VERBOSE" -ne 0 ]; then
-    printf '%s %s\n' "$ts" "$msg"
+  if [ "$LOGFILE" -ne "" ];  then
+    local ts msg
+    ts="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+    msg="$1"
+    printf '%s %s\n' "$ts" "$msg" >> "$LOGFILE"
+    if [ "$VERBOSE" -ne 0 ]; then
+      printf '%s %s\n' "$ts" "$msg"
+    fi
   fi
 }
 
@@ -323,3 +321,4 @@ fi
 log "Completed. Total files: $total_files Succeeded: $succeeded Failed: $failed"
 echo "Done!  Total files: $total_files Succeeded: $succeeded Failed: $failed"
 exit 0
+
